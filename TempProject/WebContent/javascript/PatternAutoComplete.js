@@ -34,7 +34,7 @@ $(document).ready(function() {
 //            alert(ui.item.value);
 //            alert(ui.item.label);
             $('#txtSearchSubject').val(ui.item.label);
-            hdnSubject.val(ui.item.value);
+            $("#hdnSubject").val(ui.item.value);
             return false;
           },
         minLength: 3
@@ -95,7 +95,7 @@ $(document).ready(function() {
         },
         select: function (event, ui) {
         	 $('#txtSearchObject').val(ui.item.label);
-        	 hdnObject(ui.item.value);
+        	 $('#hdnObject').val(ui.item.value);
             return false;
           },
         minLength: 3

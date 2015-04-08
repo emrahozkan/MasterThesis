@@ -23,12 +23,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.apache.http.HttpRequest;
+import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.ontology.OntClass;
 import com.hp.hpl.jena.ontology.OntModel;
+import com.hp.hpl.jena.query.Dataset;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
@@ -48,6 +50,7 @@ import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.hp.hpl.jena.reasoner.rulesys.Node_RuleVariable;
 import com.hp.hpl.jena.sparql.util.StringUtils;
+import com.hp.hpl.jena.tdb.TDBFactory;
 import com.hp.hpl.jena.util.FileManager;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 
@@ -83,11 +86,22 @@ public class FileAnalyse {
 //		Map<String, Object> predicateMap = new HashMap<String, Object>();
 //		Map<String, Object> objectMap = new HashMap<String, Object>();
 		Map<String, Object> classMap = new HashMap<String, Object>();
-		Model model = ModelFactory.createDefaultModel();
 		String data = request.getParameter("txtDataSource");
 		HttpSession session = request.getSession();
 		session.setAttribute("dataSource", data);	
-		model.read(data);
+		
+		
+		//Model model = ModelFactory.createDefaultModel();
+		ServletContext servletContext = request.getServletContext();
+		String contextPath = servletContext.getRealPath("/data");
+		String tdbPath = servletContext.getRealPath("/tdb");
+		File dir = new File(contextPath);
+		Dataset dataset = TDBFactory.createDataset(tdbPath);
+		Model model = dataset.getDefaultModel();
+		FileManager.get().readModel( model, data );
+		
+		System.out.println(dir.getAbsolutePath());
+		//model.read(data);
 		StmtIterator iter = model.listStatements();
 		Resource subject;
 		Property predicate;
@@ -161,12 +175,7 @@ public class FileAnalyse {
 		subJson.put("subjects", subjArray);
 		predJson.put("predicates",predArray);
 		
-		ServletContext servletContext = request.getServletContext();
-		String contextPath = servletContext.getRealPath("/data");
-		System.out.println(contextPath);
-		File dir = new File(contextPath);
-		System.out.println(dir.getAbsolutePath());
-		
+	
 		File subjectFile = File.createTempFile("subjects", ".json", dir); 
 		File predicateFile = File.createTempFile("predicates", ".json", dir); 
 		File objectFile = File.createTempFile("objects", ".json", dir); 
@@ -214,7 +223,7 @@ public class FileAnalyse {
 		    System.out.println(thing.asResource().getLocalName());
 		}
 		
-		
+		FileUtils.cleanDirectory(new File(tdbPath)); 
 		//patternMap.put("Subjects", subjectMap);
 		//patternMap.put("Predicates", predicateMap);
 		//patternMap.put("Objects",objectMap);

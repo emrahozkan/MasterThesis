@@ -38,7 +38,6 @@ if(session.getAttribute("userData") == null)
 ResultSet rs = null;
 UserInfo user = new UserInfo();
 user = (UserInfo)session.getAttribute("userData");
-System.out.println(user.getUserID());
 DatabaseConnection db = new DatabaseConnection();
 SliceInfo slice = new SliceInfo();
 rs = db.SliceInfoGet(slice,user.getUserID());
