@@ -31,14 +31,12 @@ public class SliceInfoServlet extends HttpServlet {
         super();
         // TODO Auto-generated constructor stub
     }
-
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// TODO Auto-generated method stub
 	}
-
 	/**
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
@@ -47,16 +45,14 @@ public class SliceInfoServlet extends HttpServlet {
 		SliceInfo slice = new SliceInfo();
 		try {
 			slice = GetSliceDetails(request);
-			sliceResult = ExecuteUpdateSlice(slice);
+			sliceResult = ExecuteUpdateSlice(slice, request);
 			LogSlice(slice);
 		} catch (InstantiationException | IllegalAccessException
 				| ClassNotFoundException | SQLException e) {
 			sliceResult=e.toString();
 		}
-		
 		Map<String,Object> map = new HashMap<String,Object>();
 		map.put("sliceResult", sliceResult);
-		
 		
 		write(response, map);
 	}
@@ -75,13 +71,13 @@ public class SliceInfoServlet extends HttpServlet {
 		slice = so.GetSlice(request);
 		return slice;
 	}
-	private String ExecuteUpdateSlice(SliceInfo slice) throws IOException
+	private String ExecuteUpdateSlice(SliceInfo slice, HttpServletRequest request) throws IOException
 	{
 		String result = "";
 		ExecuteSlice es = new ExecuteSlice();
 		
 		try{
-			es.ExecuteSlice(slice.getPatterns(),slice.getDataSource());
+			es.ExecuteSlice(slice.getPatterns(),slice.getDataSource(), request);
 			result="success";
 		}
 		catch(Exception e)
@@ -93,8 +89,6 @@ public class SliceInfoServlet extends HttpServlet {
 	private void LogSlice(SliceInfo slice) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException
 	{
 		DatabaseConnection db = new DatabaseConnection();
-		db.SliceInfoUpdate(slice);
-		
+		db.SliceInfoUpdate(slice);	
 	}
-
 }

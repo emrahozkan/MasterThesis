@@ -15,18 +15,96 @@ public class SparqlBuilder {
 		query += "}";
 		return query;
 	}
-
-	public String FormViewQuery(HttpServletRequest request) {
+	
+	public String FormPatternQuery(HttpServletRequest request) {
 		
 		int counter = Integer.parseInt(request.getParameter("hdnCounter"));
-		String pattern = "Select * where { </br>";
+		String pattern = "";
 		String subquery = "";
 		String subject, predicate, object;
 		int k = 0;
 		int hdnCounter=0;
 		int tempCtr=0;
 		boolean temp = true;
-
+		String type = request.getParameter("radGroupQueryType").toString();
+		while(temp)
+		{	
+			
+			if (request.getParameterMap().containsKey("hdnSelectCounter" + k)) {
+				tempCtr=Integer.parseInt(request.getParameter("hdnSelectCounter"+k));
+				temp = false;
+			}
+			
+			k++;
+		}
+	
+		if(type.equals("query"))
+		{
+			pattern = "Select * where { ";
+			for (int i = 0; i <= counter; i++) {
+				if (request.getParameterMap().containsKey("txtSelectSubject" + i)) {
+					
+					hdnCounter = Integer.parseInt(request.getParameter("hdnSelectCounter"+i));				
+					if(tempCtr != hdnCounter)
+					{
+						pattern += "{"+subquery+"} UNION ";
+						subquery="";
+						tempCtr=hdnCounter;
+					}
+					
+					subject = CheckInstance(request.getParameter("txtSelectSubject"
+							+ i));
+					predicate = CheckInstance(request
+							.getParameter("txtSelectPredicate" + i));
+					object = CheckInstance(request.getParameter("txtSelectObject"
+							+ i));
+					subquery += " " + subject + " " + predicate + " " + object + ". ";				
+				}
+			}
+			subquery = "{"+subquery+"}";
+			pattern += subquery+" }";
+		}
+		else{
+			pattern = "";
+			for (int i = 0; i <= counter; i++) {
+				if (request.getParameterMap().containsKey("txtSelectSubject" + i)) {
+					
+					hdnCounter = Integer.parseInt(request.getParameter("hdnSelectCounter"+i));				
+					if(tempCtr != hdnCounter)
+					{
+						pattern += "{"+subquery+"} ";
+						subquery="";
+						tempCtr=hdnCounter;
+					}
+					
+					subject = CheckInstance(request.getParameter("txtSelectSubject"
+							+ i));
+					predicate = CheckInstance(request
+							.getParameter("txtSelectPredicate" + i));
+					object = CheckInstance(request.getParameter("txtSelectObject"
+							+ i));
+					subquery += " " + subject + " " + predicate + " " + object + ".";				
+				}
+			}
+			subquery = "{"+subquery+"}";
+			pattern += subquery;
+		}
+		System.out.println(pattern);
+		return pattern;
+	}
+	
+	public String FormViewQuery(HttpServletRequest request) {
+		
+		int counter = Integer.parseInt(request.getParameter("hdnCounter"));
+		
+		String subquery = "";
+		String subject, predicate, object, pattern="";
+		int k = 0;
+		int hdnCounter=0;
+		int tempCtr=0;
+		boolean temp = true;
+		String type = request.getParameter("radGroupQueryType").toString();
+		
 		while(temp)
 		{	
 			if (request.getParameterMap().containsKey("hdnSelectCounter" + k)) {
@@ -35,31 +113,60 @@ public class SparqlBuilder {
 			}
 			k++;
 		}
-	
-		for (int i = 0; i <= counter; i++) {
-			if (request.getParameterMap().containsKey("txtSelectSubject" + i)) {
-				
-				hdnCounter = Integer.parseInt(request.getParameter("hdnSelectCounter"+i));				
-				if(tempCtr != hdnCounter)
-				{
-					pattern += "{"+subquery+"} </br> UNION </br> ";
-					subquery="";
-					tempCtr=hdnCounter;
+		if(type.equals("query"))
+		{
+			pattern = "Select * where { </br>";
+			for (int i = 0; i <= counter; i++) {
+				if (request.getParameterMap().containsKey("txtSelectSubject" + i)) {
+					
+					hdnCounter = Integer.parseInt(request.getParameter("hdnSelectCounter"+i));				
+					if(tempCtr != hdnCounter)
+					{
+						pattern += "{"+subquery+"} </br> UNION </br> ";
+						subquery="";
+						tempCtr=hdnCounter;
+					}
+					
+					subject = CheckInstance(request.getParameter("txtSelectSubject"
+							+ i));
+					predicate = CheckInstance(request
+							.getParameter("txtSelectPredicate" + i));
+					object = CheckInstance(request.getParameter("txtSelectObject"
+							+ i));
+					subquery += subject + " " + predicate + " " + object + ". </br> ";				
 				}
-				
-				subject = CheckInstance(request.getParameter("txtSelectSubject"
-						+ i));
-				predicate = CheckInstance(request
-						.getParameter("txtSelectPredicate" + i));
-				object = CheckInstance(request.getParameter("txtSelectObject"
-						+ i));
-				subquery += subject + " " + predicate + " " + object + ". </br> ";				
 			}
+			subquery = "{"+subquery+"}";
+			pattern += subquery+"</br>}";
 		}
-		subquery = "{"+subquery+"}";
-		pattern += subquery+"</br>}";
+		else{
+			pattern = "";
+			for (int i = 0; i <= counter; i++) {
+				if (request.getParameterMap().containsKey("txtSelectSubject" + i)) {
+					
+					hdnCounter = Integer.parseInt(request.getParameter("hdnSelectCounter"+i));				
+					if(tempCtr != hdnCounter)
+					{
+						pattern += "{"+subquery+"} </br> ";
+						subquery="";
+						tempCtr=hdnCounter;
+					}
+					
+					subject = CheckInstance(request.getParameter("txtSelectSubject"
+							+ i));
+					predicate = CheckInstance(request
+							.getParameter("txtSelectPredicate" + i));
+					object = CheckInstance(request.getParameter("txtSelectObject"
+							+ i));
+					subquery += subject + " " + predicate + " " + object + ".</br>";				
+				}
+			}
+			subquery = "{"+subquery+"}";
+			pattern += subquery;
+		}
 		return pattern;
 	}
+	
 	public String FormClassQuery(HttpServletRequest request)
 	{
 		int counter = Integer.parseInt(request.getParameter("hdnClassCtr"));
@@ -126,52 +233,7 @@ public class SparqlBuilder {
 		return pattern;
 	}
 
-	public String FormPatternQuery(HttpServletRequest request) {
-		
-		int counter = Integer.parseInt(request.getParameter("hdnCounter"));
-		String pattern = "Select * where { ";
-		String subquery = "";
-		String subject, predicate, object;
-		int k = 0;
-		int hdnCounter=0;
-		int tempCtr=0;
-		boolean temp = true;
-
-		while(temp)
-		{	
-			
-			if (request.getParameterMap().containsKey("hdnSelectCounter" + k)) {
-				tempCtr=Integer.parseInt(request.getParameter("hdnSelectCounter"+k));
-				temp = false;
-			}
-			
-			k++;
-		}
 	
-		for (int i = 0; i <= counter; i++) {
-			if (request.getParameterMap().containsKey("txtSelectSubject" + i)) {
-				
-				hdnCounter = Integer.parseInt(request.getParameter("hdnSelectCounter"+i));				
-				if(tempCtr != hdnCounter)
-				{
-					pattern += "{"+subquery+"} UNION ";
-					subquery="";
-					tempCtr=hdnCounter;
-				}
-				
-				subject = CheckInstance(request.getParameter("txtSelectSubject"
-						+ i));
-				predicate = CheckInstance(request
-						.getParameter("txtSelectPredicate" + i));
-				object = CheckInstance(request.getParameter("txtSelectObject"
-						+ i));
-				subquery += subject + " " + predicate + " " + object + ". ";				
-			}
-		}
-		subquery = "{"+subquery+"}";
-		pattern += subquery+" }";
-		return pattern;
-	}
 
 	
 	public String FormPatternQuery2(HttpServletRequest request) {

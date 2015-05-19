@@ -1,0 +1,48 @@
+\begin{thebibliography}{7}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[DuCharme(2013)]{Reference7}
+Bob DuCharme.
+\newblock \emph{Learning SPARQL, Second Edition}.
+\newblock O’Reilly Media, Inc.,, 1005 Gravenstein Highway North, Sebastopol,
+  CA 95472, 2013.
+
+\bibitem[Bizer et~al.(2009)Bizer, Heath, and Berners-Lee]{Reference4}
+C~Bizer, T~Heath, and T~Berners-Lee.
+\newblock Linked data-the story so far.
+\newblock 2009.
+
+\bibitem[W3C(2004)]{Reference5}
+W3C.
+\newblock \emph{Resource Description Framework (RDF): Concepts and Abstract
+  Syntax}, 2004.
+\newblock URL \url{http://www.w3.org/TR/2003/PR-rdf-concepts-20031215/}.
+
+\bibitem[Berners-Lee(2009)]{Reference6}
+Tim Berners-Lee.
+\newblock \emph{Linked Data-Design Issues}, 2009.
+\newblock URL \url{http://www.w3.org/DesignIssues/LinkedData.html}.
+
+\bibitem[Decker et~al.(2000)Decker, Harmelen, Broekstra, Erdmann, Fensel,
+  Horrocks, Klein, and Melnik]{Reference1}
+Stefan Decker, Frank~Van Harmelen, Jeen Broekstra, Michael Erdmann, Dieter
+  Fensel, Ian Horrocks, Michel Klein, and Sergey Melnik.
+\newblock The semantic web - on the respective roles of xml and rdf.
+\newblock \emph{IEEE Internet Computing}, 4:\penalty0 http://www.ontoknowl,
+  2000.
+
+\bibitem[Cyganiak(2014)]{Reference2}
+Richard Cyganiak.
+\newblock \emph{The Linking Open Data cloud diagram}, 2014.
+\newblock URL \url{http://lod-cloud.net/}.
+
+\bibitem[W3C(2014)]{Reference3}
+W3C.
+\newblock \emph{DataSetRDFDumps}, 2014.
+\newblock URL \url{http://www.w3.org/wiki/DataSetRDFDumps}.
+
+\end{thebibliography}

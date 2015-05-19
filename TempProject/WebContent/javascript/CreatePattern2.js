@@ -18,8 +18,8 @@ $(document).ready(function()
 			var objectText;
 	
 			if($("input[name='radGroupSubj']:checked").val()=="Resource")
-			{subjectVal = $("#txtSearchSubject").val();
-			subjectText = $("#hdnSubject").val();
+			{subjectText = $("#txtSearchSubject").val();
+			subjectVal = $("#hdnSubject").val();
 			}
 			else{subjectText="Any"; subjectVal="Any";}
 			
@@ -36,8 +36,8 @@ $(document).ready(function()
 			{
 //				objectVal = $("#ddlObject option:selected").val();
 //				objectText = $("#ddlObject option:selected").text();
-				objectVal = $("#txtSearchObject").val();
-				objectText =  $("#hdnObject").val()
+				objectText = $("#txtSearchObject").val();
+				objectVal =  $("#hdnObject").val()
 			}
 			else{objectText="Any"; objectVal="Any";}
 			var newRow = $('<tr style="display:none;"></tr>');
@@ -50,7 +50,7 @@ $(document).ready(function()
 
 			cols += '<td align="right"><div id="divSubject'+counter+'">'+subjectText+'</div><input type="text" value="'+subjectVal+'" name="txtGraphSubject'
 					+ counter + '" id="txtGraphSubject'	+ counter + '" style="display:none"/></td>';
-			cols +=  '<td align="center"><div id="divPredicate'+counter+'">'+predicateText+'</div><input type="text" value="'+predicateVal+
+			cols += '<td align="center"><div id="divPredicate'+counter+'">'+predicateText+'</div><input type="text" value="'+predicateVal+
 			'" name="txtGraphPredicate' + counter + '" id="txtGraphPredicate'	+ counter + '" style="display:none"/></td>';
 			cols +=  '<td align="left"><div id="divObject'+counter+'">'+objectText+'</div><input type="text" value="'+objectVal+
 			'" name="txtGraphObject' + counter + '" id="txtGraphObject'	+ counter + '" style="display:none"/></td>';

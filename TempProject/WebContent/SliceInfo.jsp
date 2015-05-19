@@ -94,10 +94,21 @@ while(rs.next()){
 					<td><%=rs.getString("CREATE_DATE") %></td>
 				</tr>
 				<tr style="box-shadow:none;">
+					<td style="font-weight: 600"></td>
+					<td><%
+					if(user.getUserID() == Integer.parseInt(rs.getString("CREATED_BY")) &&  (rs.getString("IS_PUBLIC").equals("0")))
+					{
+						System.out.println(rs.getString("IS_PUBLIC"));
+						System.out.println(Boolean.parseBoolean(rs.getString("IS_PUBLIC")));
+					%> <button title="Publish Slice"  name="btnPublishSlice" id="btnPublishSlice" class="btn-blue" value="Publish Slice">Publish Slice</button> <%
+					}
+					  %></td>
+				</tr >
+				<tr style="box-shadow:none;">
 					<td style="font-weight: 600">Last Update:</td>
 					<td><%=rs.getString("LAST_UPDATE") %></td>
 				</tr >
-				<tr>
+				<tr >
 				<td>
 				
 				</td>

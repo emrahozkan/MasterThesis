@@ -7,7 +7,7 @@ var hdnObject = $("#hdnObject");
     $(".chzn-select").chosen();
 });
 $(document).ready(function() {
-	alert(3);
+	alert(1);
     $('#txtSearchSubject').autocomplete({
         delay: 0,  
         source: function (request, response) {
@@ -31,8 +31,6 @@ $(document).ready(function() {
             });
         },
         select: function (event, ui) {
-//            alert(ui.item.value);
-//            alert(ui.item.label);
             $('#txtSearchSubject').val(ui.item.label);
             $("#hdnSubject").val(ui.item.value);
             return false;
@@ -94,6 +92,8 @@ $(document).ready(function() {
             });
         },
         select: function (event, ui) {
+             alert(ui.item.value);
+             alert(ui.item.label);
         	 $('#txtSearchObject').val(ui.item.label);
         	 $('#hdnObject').val(ui.item.value);
             return false;

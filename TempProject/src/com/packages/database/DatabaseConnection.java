@@ -166,8 +166,8 @@ public class DatabaseConnection extends DbInfo {
 				+ DB_NAME, USER_NAME, PASSWORD);
 		PreparedStatement ps = con
 				.prepareCall("{call PUBLISH_SLICE(?, ?)}");
-		ps.setInt(1,sliceID);
-		ps.setBoolean(2, isPublic);
+		ps.setBoolean(1,isPublic);
+		ps.setInt(2, sliceID);
 		ps.executeQuery();
 	}
 	

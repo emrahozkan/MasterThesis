@@ -113,7 +113,13 @@ $(".chosen-select").chosen()
 					</tr>
 				
 					<tr align="center">
-						<td colspan="3" align="right">
+					<td align="left">
+						<input type="radio" name="radGroupQueryType" value="query" checked="checked"/>
+							Query 
+							<input type="radio" id="radSubj" name="radGroupQueryType" value="pattern" />
+							Pattern
+					</td>
+						<td colspan="2" align="right">
 						<input type="button" name="btnAddRow" id="btnAddRow" value="Add Pattern" class="btn-blue"/></td>
 					</tr>
 				</table>

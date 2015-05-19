@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+import javax.servlet.http.HttpServletRequest;
+
 public class ExecuteSlice {
 	public String ExecuteRDFSlice(String pattern, String dataSource)
 			throws IOException {
@@ -62,22 +64,31 @@ public class ExecuteSlice {
 				
 	}
 
-	public String ExecuteSlice(String pattern, String dataSource)
+	public String ExecuteSlice(String pattern, String dataSource,HttpServletRequest request)
 			throws IOException {
 		ProcessBuilder pb = new ProcessBuilder(
 			    "java",
 			    "-jar",
-			    "/users/emrahozkan/documents/thesis/rdfslice/rdfslice_1.6.jar",
+			    request.getServletContext().getRealPath("/data")+"/rdfslice_1.6.jar",
 			    "-source",
 			    dataSource,
 			    "-patterns",
 			    pattern,
 			    "-out",
-			    System.getProperty("user.home")+"/Desktop/output.out",
-			    "-order",
-			    "S");
-
+			    System.getProperty("user.home")+"/Desktop/output.out"
+//			    "-order",
+//			    "S"
+			    );
+		System.out.println(pb.command());
 		Process p = pb.inheritIO().start();
+		try {
+			p.waitFor();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			System.out.println("burdan");
+			e.printStackTrace();
+			System.out.println("buraya");
+		}
 		BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
 		StringBuilder builder = new StringBuilder();
 		String line = null;
@@ -86,7 +97,7 @@ public class ExecuteSlice {
 			//builder.append(System.getProperty("line.separator"));
 		}
 		String result = builder.toString();
-		System.out.println(reader.toString());
+		System.out.println("BURASI "+reader.toString());
 		
 
 		

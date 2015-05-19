@@ -67,6 +67,7 @@ public class CreatePatternServlet extends HttpServlet {
 			HttpServletResponse response) throws IOException {
 		// TODO Auto-generated method stub
 		 HttpSession session = request.getSession();
+		 System.out.println(request.getParameter("radGroupQueryType"));
 		Map<String, Object> map = new HashMap<String, Object>();
 		Map<String, Map<String, Object>> tempMap = new HashMap<String, Map<String, Object>>();
 		try {

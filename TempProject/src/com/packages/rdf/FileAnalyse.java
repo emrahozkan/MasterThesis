@@ -1,33 +1,25 @@
 package com.packages.rdf;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PrintWriter;
-import java.sql.ResultSet;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
+import java.util.zip.GZIPInputStream;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import org.apache.http.HttpRequest;
 import org.apache.tomcat.util.http.fileupload.FileUtils;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
+import org.json.simple.*;
 
-import com.hp.hpl.jena.graph.Node;
+import com.google.gson.Gson;
+import com.google.gson.stream.JsonWriter;
 import com.hp.hpl.jena.ontology.OntClass;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.query.Dataset;
@@ -36,25 +28,45 @@ import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.QuerySolution;
-import com.hp.hpl.jena.rdf.model.Literal;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.rdf.model.NodeIterator;
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.RDFNode;
-import com.hp.hpl.jena.rdf.model.ResIterator;
 import com.hp.hpl.jena.rdf.model.Resource;
-import com.hp.hpl.jena.rdf.model.Selector;
-import com.hp.hpl.jena.rdf.model.SimpleSelector;
 import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
-import com.hp.hpl.jena.reasoner.rulesys.Node_RuleVariable;
-import com.hp.hpl.jena.sparql.util.StringUtils;
 import com.hp.hpl.jena.tdb.TDBFactory;
 import com.hp.hpl.jena.util.FileManager;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 
 public class FileAnalyse {
+	private static final String[] REPLACEMENT_CHARS;
+	private static final String[] HTML_SAFE_REPLACEMENT_CHARS;
+	static {
+	    REPLACEMENT_CHARS = new String[128];
+	    for (int i = 0; i <= 0x1f; i++) {
+	      REPLACEMENT_CHARS[i] = String.format("\\u%04x", (int) i);
+	    }
+	    REPLACEMENT_CHARS['"'] = "\\\"";
+	    REPLACEMENT_CHARS['\\'] = "\\\\";
+	    REPLACEMENT_CHARS['\t'] = "\\t";
+	    REPLACEMENT_CHARS['\b'] = "\\b";
+	    REPLACEMENT_CHARS['\n'] = "\\n";
+	    REPLACEMENT_CHARS['\r'] = "\\r";
+	    REPLACEMENT_CHARS['\f'] = "\\f";
+	    HTML_SAFE_REPLACEMENT_CHARS = REPLACEMENT_CHARS.clone();
+	    HTML_SAFE_REPLACEMENT_CHARS['<'] = "\\u003c";
+	    HTML_SAFE_REPLACEMENT_CHARS['>'] = "\\u003e";
+	    HTML_SAFE_REPLACEMENT_CHARS['&'] = "\\u0026";
+	    HTML_SAFE_REPLACEMENT_CHARS['='] = "\\u003d";
+	    HTML_SAFE_REPLACEMENT_CHARS['\''] = "\\u0027";
+	  }
+	private Byte[] getActual(String value) throws IOException {
+	    Byte[] temp = null; 
+	    
+	    return temp;
+	    
+	  }
 	public Map<String, Object> GetClasses(String fileLoc) {
 		Map<String, Object> fileMap = new HashMap<String, Object>();
 		System.out.println("I am awake");
@@ -82,123 +94,192 @@ public class FileAnalyse {
 	@SuppressWarnings("unchecked")
 	public Map<String, Map<String, Object>> GetFileComponents(HttpServletRequest request) throws IOException {
 		Map<String, Map<String, Object>> patternMap = new HashMap<String, Map<String, Object>>();
-//		Map<String, Object> subjectMap = new HashMap<String, Object>();
-//		Map<String, Object> predicateMap = new HashMap<String, Object>();
-//		Map<String, Object> objectMap = new HashMap<String, Object>();
 		Map<String, Object> classMap = new HashMap<String, Object>();
 		String data = request.getParameter("txtDataSource");
 		HttpSession session = request.getSession();
 		session.setAttribute("dataSource", data);	
 		
 		
-		//Model model = ModelFactory.createDefaultModel();
 		ServletContext servletContext = request.getServletContext();
 		String contextPath = servletContext.getRealPath("/data");
 		String tdbPath = servletContext.getRealPath("/tdb");
 		File dir = new File(contextPath);
+		
+		//JsonWriter oStream;
+		File subjectFile = File.createTempFile("subjects", ".json", dir); //burası var
+		File predicateFile = File.createTempFile("predicates", ".json", dir); 
+		File objectFile = File.createTempFile("objects", ".json", dir);
+		
+	
+		FileWriter subjectStream = new FileWriter(subjectFile,true);
+		FileWriter pStream = new FileWriter(predicateFile,true);
+		FileWriter oStream = new FileWriter(objectFile,true); 
+		//oStream = new JsonWriter(new FileWriter(objectFile,true));
+		
+		System.out.println(subjectFile.getAbsolutePath());
+		subjectStream.write("{\"subjects\" : [ ");
+		pStream.write( "{\"predicates\" : [ ");
+		oStream.write( "{\"objects\" : [ ");
+		System.out.println(contextPath);
+		System.out.println(tdbPath);
 		Dataset dataset = TDBFactory.createDataset(tdbPath);
 		Model model = dataset.getDefaultModel();
-		FileManager.get().readModel( model, data );
-		
+		System.out.println(1);
+		InputStream str = FileManager.get().open(data);
+		if(data.substring(data.lastIndexOf('.')).equals(".gz"))
+		{
+			str = new GZIPInputStream(str);
+		}
+		System.out.println(2);
+		String fileType = "";
+		fileType = data.substring(data.substring(0, data.lastIndexOf('.')).lastIndexOf('.'),data.lastIndexOf('.'));
+		System.out.println(fileType);
+		if(fileType.equals(".nt"))
+		{
+			model.read(str,null, "N-TRIPLES");	
+		}
+		else{
+			model.read(str,null);	
+		}
 		System.out.println(dir.getAbsolutePath());
-		//model.read(data);
 		StmtIterator iter = model.listStatements();
 		Resource subject;
 		Property predicate;
 		RDFNode object;
 		int i = 0;
-		JSONObject subJson = new JSONObject();   
-		JSONObject predJson = new JSONObject(); 
-		JSONObject objJson = new JSONObject(); 
-        
-        JSONArray objArray = new JSONArray();
-        JSONArray predArray = new JSONArray();
-        JSONArray subjArray = new JSONArray();
+//		JSONObject subJson = new JSONObject();   
+//		JSONObject predJson = new JSONObject(); 
+//		JSONObject objJson = new JSONObject(); 
+//        
+//        JSONArray objArray = new JSONArray();
+//        JSONArray predArray = new JSONArray();
+//        JSONArray subjArray = new JSONArray();
         Set<String> usedObjKeys = new HashSet<String>();
         Set<String> usedSubjKeys = new HashSet<String>();
         Set<String> usedPredKeys = new HashSet<String>();
+//        oStream.name("objects");
+//        oStream.beginArray();
+        JSONObject gson = new JSONObject();
 		while (iter.hasNext()) {
-			Map<String,String>objMap = new HashMap<String, String>();
-			Map<String,String>predMap = new HashMap<String, String>();
-			Map<String,String>subjMap = new HashMap<String, String>();
+			JSONObject objJson = new JSONObject();
+			JSONObject subJson = new JSONObject();   
+			JSONObject predJson = new JSONObject(); 
+			//Map<String,String>objMap = new HashMap<String, String>();
+			//Map<String,String>predMap = new HashMap<String, String>();
+			//Map<String,String>subjMap = new HashMap<String, String>();
 			Statement stmt = iter.nextStatement();
 			subject = stmt.getSubject();
 			predicate = stmt.getPredicate();
 			object = stmt.getObject();
 			String subjKey, predKey, objKey;
+			String oKey, oValue, pKey, pValue, sKey, sValue;
+			
 			subjKey = subject.getLocalName();
 			predKey=predicate.getLocalName();
 
-//			subjectMap.put(subject.getLocalName(),"<"+subject.getURI()+">" );
-//			predicateMap.put(predicate.getLocalName(),(predicate.isLiteral() ? predicate.getLocalName() : "<"+predicate.getURI()+">"));
-			subjMap.put("key", subject.getLocalName());
-			subjMap.put("value",subject.getURI());
-			predMap.put("key", predicate.getLocalName());
-			predMap.put("value",(predicate.isLiteral() ? predicate.getLocalName() : "<"+predicate.getURI()+">"));
+//			subjMap.put("key", subject.getLocalName());
+//			subjMap.put("value",subject.getURI());
+			
+			
+			pKey = predicate.getLocalName();
+			pValue = (predicate.isLiteral() ? predicate.getLocalName() : "<"+predicate.getURI()+">");
+			sKey = subject.getLocalName();
+			sValue = subject.getURI();
+//			predMap.put("key", predicate.getLocalName());
+//			predMap.put("value",(predicate.isLiteral() ? predicate.getLocalName() : "<"+predicate.getURI()+">"));
 			
 			if(object.isResource())
 			{
 				objKey = object.asResource().getLocalName();
-//				objectMap.put(object.asResource().getLocalName(), "<"+object.asResource().getURI()+">");
-				objMap.put("key", object.asResource().getLocalName());
-		        objMap.put("value", "<"+object.asResource().getURI()+">");
+				oKey = object.asResource().getLocalName();
+				oValue = "<"+object.asResource().getURI()+">";	
+//				objMap.put("key", object.asResource().getLocalName());
+//		        objMap.put("value", "<"+object.asResource().getURI()+">");
 			}
 			else{
 				objKey = object.toString();	
-//				objectMap.put(object.toString(), object.toString());
-				objMap.put("key", object.toString());
-				objMap.put("value", object.toString());
+				oKey = object.toString();
+				oValue = object.toString();
+//				objMap.put("key", object.toString());
+//				objMap.put("value", object.toString());
 			}
 			i++;
 			System.out.println(i);
 			if(!usedObjKeys.contains(objKey))
-			{
+			{			
+				
+//				oStream.name("key").value(oKey);
+//				oStream.name("value").value(oValue);
+				//oStream.write(("{\"value\":\""+ +"\",\"key\" : \""+ new JSONObject(oKey).toString() +"\" }, ").getBytes());
+				objJson.put("key", oKey);
+				objJson.put("value", oValue);
+				oStream.write(objJson.toJSONString()+" , ");
 				usedObjKeys.add(objKey);
-				objArray.add(objMap);
+				//objArray.add(objMap);
 			}
 			if(!usedSubjKeys.contains(subjKey))
 			{
+				subJson.put("key", sKey);
+				subJson.put("value", sValue);
+				subjectStream.write(subJson.toJSONString()+ " , ");
+				//subjectStream.write(("{\"value\":\""+subject.getURI()+"\",\"key\" : \""+ subject.getLocalName() +"\" }, ").getBytes());
 				usedSubjKeys.add(subjKey);
-				subjArray.add(subjMap);
+//				subjArray.add(subjMap);
 			}
 			if(!usedPredKeys.contains(predKey))
 			{
+				predJson.put("key", pKey);
+				predJson.put("value", pValue);
+				pStream.write(predJson.toJSONString()+" , ");
+				//pStream.write(("{\"value\":\""+pValue+"\",\"key\" : \""+ pKey +"\" }, ").getBytes());
 				usedPredKeys.add(predKey);
-				predArray.add(predMap);
+				//predArray.add(predMap);
 			}
 		}
-
+		subjectStream.write(("{\"value\":\"\",\"key\" : \"\" }]} "));
+		subjectStream.flush();
+		subjectStream.close();
+		pStream.write(("{\"value\":\"\",\"key\" : \"\" }]} "));
+		pStream.flush();
+		pStream.close();
+		oStream.write(("{\"value\":\"\",\"key\" : \"\" }]} "));
+//		oStream.endArray();
+//		oStream.endObject();
+		oStream.flush();
+		oStream.close();
+		
 		usedPredKeys = null;
 		usedSubjKeys = null;
 		usedObjKeys = null;
-		objJson.put("objects", objArray);
-		subJson.put("subjects", subjArray);
-		predJson.put("predicates",predArray);
+		
+//		objJson.put("objects", objArray);
+//		subJson.put("subjects", subjArray);
+//		predJson.put("predicates",predArray);
 		
 	
-		File subjectFile = File.createTempFile("subjects", ".json", dir); 
-		File predicateFile = File.createTempFile("predicates", ".json", dir); 
-		File objectFile = File.createTempFile("objects", ".json", dir); 
+		//File subjectFile = File.createTempFile("subjects", ".json", dir); 
+//		File predicateFile = File.createTempFile("predicates", ".json", dir); 
+//		File objectFile = File.createTempFile("objects", ".json", dir); 
 		
-        FileWriter fileSubject = new FileWriter(subjectFile.getAbsolutePath());
-        FileWriter filePredicate = new FileWriter(predicateFile.getAbsolutePath());
-        FileWriter fileObject = new FileWriter(objectFile.getAbsolutePath());
+//        //FileWriter fileSubject = new FileWriter(subjectFile.getAbsolutePath());
+//        FileWriter filePredicate = new FileWriter(predicateFile.getAbsolutePath());
+//        FileWriter fileObject = new FileWriter(objectFile.getAbsolutePath());
         
 
-        fileSubject.write(subJson.toJSONString());
-        filePredicate.write(predJson.toJSONString());
-        fileObject.write(objJson.toJSONString());
+        //fileSubject.write(subJson.toJSONString());
+//        filePredicate.write(predJson.toJSONString());
+//        fileObject.write(objJson.toJSONString());
         
-        subJson = null;
-        predJson= null;
-        objJson = null;
+//        subJson = null;
+//        predJson= null;
+//        objJson = null;
         
-        fileSubject.flush();
-        fileSubject.close();
-        filePredicate.flush();
-        filePredicate.close();
-        fileObject.flush();
-        fileObject.close();
+        //fileSubject.flush();
+        //fileSubject.close();
+//        filePredicate.flush();
+//        filePredicate.close();
+//        fileObject.flush();
+//        fileObject.close();
         subjectFile.deleteOnExit();
         predicateFile.deleteOnExit();
         objectFile.deleteOnExit();

@@ -49,7 +49,7 @@ public class CreateClassSliceServlet extends HttpServlet {
 		String result="";
 		HttpSession session = request.getSession();
 		try{
-			result = ExecuteSlice(FormQuery(request),session.getAttribute("dataSource").toString());
+			result = ExecuteSlice(FormQuery(request),session.getAttribute("dataSource").toString(), request);
 			LogSlice(request);
 			//FormQuery(request);
 			//result="success";
@@ -75,10 +75,10 @@ public class CreateClassSliceServlet extends HttpServlet {
 		SparqlBuilder sb = new SparqlBuilder();
 		return sb.FormClassQuery(request);
 	}
-	private String ExecuteSlice(String pattern, String filePath) throws IOException
+	private String ExecuteSlice(String pattern, String filePath, HttpServletRequest request) throws IOException
 	{
 		ExecuteSlice es = new ExecuteSlice();
-		return es.ExecuteSlice(pattern, filePath);
+		return es.ExecuteSlice(pattern, filePath, request);
 	}
 	
 	private void LogSlice(HttpServletRequest request) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException

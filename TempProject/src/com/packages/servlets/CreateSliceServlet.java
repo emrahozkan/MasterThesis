@@ -39,7 +39,7 @@ public class CreateSliceServlet extends HttpServlet {
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// TODO Auto-generated method stub
 	}
 
@@ -53,7 +53,7 @@ public class CreateSliceServlet extends HttpServlet {
 		map.put("test",request.getParameter("hdnCounter"));	
 		HttpSession session = request.getSession();
 		try{
-			result = ExecuteSlice(FormQuery(request),session.getAttribute("dataSource").toString());
+			result = ExecuteSlice(FormQuery(request),session.getAttribute("dataSource").toString(), request);
 			LogSlice(request);
 			result="success";
 		}
@@ -79,10 +79,10 @@ public class CreateSliceServlet extends HttpServlet {
 		SparqlBuilder sb = new SparqlBuilder();
 		return sb.FormPatternQuery(request);
 	}
-	private String ExecuteSlice(String pattern, String filePath) throws IOException
+	private String ExecuteSlice(String pattern, String filePath,HttpServletRequest request) throws IOException
 	{
 		ExecuteSlice es = new ExecuteSlice();
-		return es.ExecuteSlice(pattern, filePath);
+		return es.ExecuteSlice(pattern, filePath, request);
 	}
 	
 	private void LogSlice(HttpServletRequest request) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException
